@@ -1,13 +1,14 @@
 package uk.ac.ebi.subs.fileupload.checksumcalculator.service;
 
-import org.springframework.stereotype.Service;
 import uk.ac.ebi.subs.fileupload.checksumcalculator.exception.ErrorMessages;
 import uk.ac.ebi.subs.fileupload.checksumcalculator.exception.FileNotFoundException;
 import uk.ac.ebi.subs.repository.model.fileupload.File;
 import uk.ac.ebi.subs.repository.model.fileupload.FileStatus;
 import uk.ac.ebi.subs.repository.repos.fileupload.FileRepository;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import static uk.ac.ebi.subs.fileupload.checksumcalculator.exception.ErrorMessages.FILE_IN_ILLEGAL_STATE_MESSAGE;
 
@@ -17,8 +18,7 @@ import static uk.ac.ebi.subs.fileupload.checksumcalculator.exception.ErrorMessag
  * If all validation successful, then it calculates the checksum of the file and
  * updates the {@link File} in the repository. It also updates its status.
  */
-@Service
-public class ChecksumCalculatorService {
+public class ChecksumCalculator {
 
     private String tusFileID;
 
@@ -26,8 +26,9 @@ public class ChecksumCalculatorService {
 
     private File fileToCompute;
 
-    public ChecksumCalculatorService(FileRepository fileRepository) {
+    public ChecksumCalculator(FileRepository fileRepository, String tusFileID) {
         this.fileRepository = fileRepository;
+        this.tusFileID = tusFileID;
     }
 
     private File getFileToCompute() {
@@ -41,8 +42,7 @@ public class ChecksumCalculatorService {
         return fileToCompute;
     }
 
-    public boolean validateFile(String tusFileID) {
-        this.tusFileID = tusFileID;
+    public boolean validateFile() {
         return isFileExists() && isFileReadyForComputeChecksum();
     }
 
@@ -64,7 +64,31 @@ public class ChecksumCalculatorService {
     }
 
     public String calculateMD5() throws IOException, InterruptedException {
-        return MD5Calculator.computeMD5Checksum(getFileToCompute().getTargetPath());
+        String checksum = "";
+        String commandForComputeMD5OnLSF = "md5sum " + getFileToCompute().getTargetPath();
+
+        StringBuffer output = new StringBuffer();
+
+        java.lang.Runtime rt = java.lang.Runtime.getRuntime();
+        Process process = rt.exec(commandForComputeMD5OnLSF);
+        process.waitFor();
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+        String line = "";
+        while ((line = reader.readLine())!= null) {
+            output.append(line + "\n");
+        }
+
+        String[] checksumArray = output.toString().split(" ");
+
+        if (checksumArray.length > 0) {
+            checksum = checksumArray[0];
+        } else {
+            throw new RuntimeException("Something went wrong with checksum calculation");
+        }
+
+        return checksum;
     }
 
     public void updateFileWithChecksum(String checksum) {

@@ -23,14 +23,14 @@ import static org.mockito.Mockito.when;
 import static uk.ac.ebi.subs.fileupload.checksumcalculator.exception.ErrorMessages.FILE_IN_ILLEGAL_STATE_MESSAGE;
 
 @RunWith(SpringRunner.class)
-public class ChecksumCalculatorServiceTest {
+public class ChecksumCalculatorTest {
 
     private static final String TUS_FILE_ID = "ABC123";
     private static final String EXPECTED_MD5_CHECKSUM = "0f5c434bbcf15faee52bd3545972398e";
     private static final String TEST_FILE_FOR_CHECKSUM_CALCULATION = "test_file_for_checksum_calculation.txt";
     private static final String SUBMISSION_ID = "112233-aabbcc-223344";
 
-    private ChecksumCalculatorService checksumCalculatorService;
+    private ChecksumCalculator checksumCalculator;
 
     @MockBean
     private FileRepository fileRepository;
@@ -43,8 +43,6 @@ public class ChecksumCalculatorServiceTest {
     @Before
     public void setup() {
         fileToCompute = createTestFile();
-
-        checksumCalculatorService = new ChecksumCalculatorService(fileRepository);
     }
 
     @Test
@@ -52,7 +50,8 @@ public class ChecksumCalculatorServiceTest {
         this.thrown.expect(IllegalStateException.class);
         this.thrown.expectMessage(ErrorMessages.TUS_ID_NULL);
 
-        checksumCalculatorService.validateFile(null);
+        checksumCalculator = new ChecksumCalculator(fileRepository, null);
+        checksumCalculator.validateFile();
     }
 
     @Test
@@ -62,7 +61,8 @@ public class ChecksumCalculatorServiceTest {
         this.thrown.expect(FileNotFoundException.class);
         this.thrown.expectMessage(String.format(FileNotFoundException.FILE_NOT_FOUND_MESSAGE, TUS_FILE_ID));
 
-        checksumCalculatorService.validateFile(TUS_FILE_ID);
+        checksumCalculator = new ChecksumCalculator(fileRepository, TUS_FILE_ID);
+        checksumCalculator.validateFile();
     }
 
     @Test
@@ -75,16 +75,19 @@ public class ChecksumCalculatorServiceTest {
                 String.format(FILE_IN_ILLEGAL_STATE_MESSAGE, fileToCompute.getFilename())
         );
 
-        checksumCalculatorService.validateFile(TUS_FILE_ID);
+        checksumCalculator = new ChecksumCalculator(fileRepository, TUS_FILE_ID);
+        checksumCalculator.validateFile();
     }
 
     @Test
     public void whenServiceSetCorrectly_ThenChecksumGenerationWorks() throws IOException, InterruptedException {
         when(fileRepository.findByGeneratedTusId(TUS_FILE_ID)).thenReturn(fileToCompute);
 
-        assertTrue(checksumCalculatorService.validateFile(TUS_FILE_ID));
+        checksumCalculator = new ChecksumCalculator(fileRepository, TUS_FILE_ID);
 
-        String calculatedChecksum = checksumCalculatorService.calculateMD5();
+        assertTrue(checksumCalculator.validateFile());
+
+        String calculatedChecksum = checksumCalculator.calculateMD5();
 
         assertThat(calculatedChecksum, is(equalTo(EXPECTED_MD5_CHECKSUM)));
     }
@@ -93,10 +96,11 @@ public class ChecksumCalculatorServiceTest {
     public void whenServiceSetCorrectlyAndFileUpdatedWithCheckSum_ThenChecksumPersistedCorrectly() throws IOException, InterruptedException {
         when(fileRepository.findByGeneratedTusId(TUS_FILE_ID)).thenReturn(fileToCompute);
 
-        checksumCalculatorService.validateFile(TUS_FILE_ID);
+        checksumCalculator = new ChecksumCalculator(fileRepository, TUS_FILE_ID);
+        checksumCalculator.validateFile();
 
-        String calculatedChecksum = checksumCalculatorService.calculateMD5();
-        checksumCalculatorService.updateFileWithChecksum(calculatedChecksum);
+        String calculatedChecksum = checksumCalculator.calculateMD5();
+        checksumCalculator.updateFileWithChecksum(calculatedChecksum);
 
         assertThat(fileToCompute.getChecksum(), is(equalTo(EXPECTED_MD5_CHECKSUM)));
         assertThat(fileToCompute.getStatus(), is(equalTo(FileStatus.READY_FOR_ARCHIVE)));
