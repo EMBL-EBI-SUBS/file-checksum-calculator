@@ -1,4 +1,4 @@
-package uk.ac.ebi.subs.fileupload.checksumcalculator.exception;
+package uk.ac.ebi.subs.filechecksumcalculator.exception;
 
 public class FileNotFoundException extends RuntimeException {
 

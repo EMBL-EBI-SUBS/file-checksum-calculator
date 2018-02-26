@@ -1,11 +1,11 @@
-package uk.ac.ebi.subs.fileupload.checksumcalculator;
+package uk.ac.ebi.subs;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.system.ApplicationPidFileWriter;
-import uk.ac.ebi.subs.fileupload.checksumcalculator.service.ChecksumCalculator;
 import uk.ac.ebi.subs.repository.repos.fileupload.FileRepository;
+import uk.ac.ebi.subs.filechecksumcalculator.service.ChecksumCalculator;
 
 /**
  * This is a command line Spring Boot application
