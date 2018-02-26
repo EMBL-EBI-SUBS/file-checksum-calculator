@@ -1,0 +1,58 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.10.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+plugins {
+    id 'com.sourcemuse.mongo' version '1.0.0'
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'application'
+
+group = 'uk.ac.ebi.subs'
+version = '0.1.0-SNAPSHOT'
+sourceCompatibility = 1.8
+
+mainClassName = "uk.ac.ebi.subs.fileupload.checksumcalculator.FileChecksumCalculatorApplication"
+
+repositories {
+	mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+}
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter-actuator')
+	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+
+	compile('uk.ac.ebi.subs:subs-repository:1.10.0-SNAPSHOT')
+
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+    runWithMongoDb = true
+}
+
+mongo {
+    mongoVersion = "3.4.3"
+}
+
+springBoot {
+    executable = true
+}
+
+ext.gradle_env = hasProperty('env') ? env : 'dev'
