@@ -4,7 +4,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.system.ApplicationPidFileWriter;
-import uk.ac.ebi.subs.fileupload.checksumcalculator.exception.FileNotFoundException;
 import uk.ac.ebi.subs.fileupload.checksumcalculator.service.ChecksumCalculatorService;
 
 /**
@@ -31,11 +30,9 @@ public class FileChecksumCalculatorApplication implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		if (args.length > 0) {
 			String fileId = args[0];
-			checksumCalculatorService.setTusFileID(fileId);
+			checksumCalculatorService.validateFile(fileId);
 
-			checksumCalculatorService.validateFile();
-
-			String checksum = checksumCalculatorService.computeChecksum();
+			String checksum = checksumCalculatorService.calculateMD5();
 
 			checksumCalculatorService.updateFileWithChecksum(checksum);
 		}

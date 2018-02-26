@@ -52,7 +52,7 @@ public class ChecksumCalculatorServiceTest {
         this.thrown.expect(IllegalStateException.class);
         this.thrown.expectMessage(ErrorMessages.TUS_ID_NULL);
 
-        checksumCalculatorService.validateFile();
+        checksumCalculatorService.validateFile(null);
     }
 
     @Test
@@ -62,8 +62,7 @@ public class ChecksumCalculatorServiceTest {
         this.thrown.expect(FileNotFoundException.class);
         this.thrown.expectMessage(String.format(FileNotFoundException.FILE_NOT_FOUND_MESSAGE, TUS_FILE_ID));
 
-        checksumCalculatorService.setTusFileID(TUS_FILE_ID);
-        checksumCalculatorService.validateFile();
+        checksumCalculatorService.validateFile(TUS_FILE_ID);
     }
 
     @Test
@@ -76,19 +75,16 @@ public class ChecksumCalculatorServiceTest {
                 String.format(FILE_IN_ILLEGAL_STATE_MESSAGE, fileToCompute.getFilename())
         );
 
-        checksumCalculatorService.setTusFileID(TUS_FILE_ID);
-        checksumCalculatorService.validateFile();
+        checksumCalculatorService.validateFile(TUS_FILE_ID);
     }
 
     @Test
     public void whenServiceSetCorrectly_ThenChecksumGenerationWorks() throws IOException, InterruptedException {
         when(fileRepository.findByGeneratedTusId(TUS_FILE_ID)).thenReturn(fileToCompute);
 
-        checksumCalculatorService.setTusFileID(TUS_FILE_ID);
+        assertTrue(checksumCalculatorService.validateFile(TUS_FILE_ID));
 
-        assertTrue(checksumCalculatorService.validateFile());
-
-        String calculatedChecksum = checksumCalculatorService.computeChecksum();
+        String calculatedChecksum = checksumCalculatorService.calculateMD5();
 
         assertThat(calculatedChecksum, is(equalTo(EXPECTED_MD5_CHECKSUM)));
     }
@@ -97,9 +93,9 @@ public class ChecksumCalculatorServiceTest {
     public void whenServiceSetCorrectlyAndFileUpdatedWithCheckSum_ThenChecksumPersistedCorrectly() throws IOException, InterruptedException {
         when(fileRepository.findByGeneratedTusId(TUS_FILE_ID)).thenReturn(fileToCompute);
 
-        checksumCalculatorService.setTusFileID(TUS_FILE_ID);
+        checksumCalculatorService.validateFile(TUS_FILE_ID);
 
-        String calculatedChecksum = checksumCalculatorService.computeChecksum();
+        String calculatedChecksum = checksumCalculatorService.calculateMD5();
         checksumCalculatorService.updateFileWithChecksum(calculatedChecksum);
 
         assertThat(fileToCompute.getChecksum(), is(equalTo(EXPECTED_MD5_CHECKSUM)));
