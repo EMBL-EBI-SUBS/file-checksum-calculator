@@ -1,4 +1,4 @@
-package uk.ac.ebi.subs.fileupload.checksumcalculator.service;
+package uk.ac.ebi.subs.filechecksumcalculator.service;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -7,8 +7,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.ac.ebi.subs.fileupload.checksumcalculator.exception.ErrorMessages;
-import uk.ac.ebi.subs.fileupload.checksumcalculator.exception.FileNotFoundException;
+import uk.ac.ebi.subs.filechecksumcalculator.exception.ErrorMessages;
+import uk.ac.ebi.subs.filechecksumcalculator.exception.FileNotFoundException;
 import uk.ac.ebi.subs.repository.model.fileupload.File;
 import uk.ac.ebi.subs.repository.model.fileupload.FileStatus;
 import uk.ac.ebi.subs.repository.repos.fileupload.FileRepository;
@@ -20,7 +20,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-import static uk.ac.ebi.subs.fileupload.checksumcalculator.exception.ErrorMessages.FILE_IN_ILLEGAL_STATE_MESSAGE;
 
 @RunWith(SpringRunner.class)
 public class ChecksumCalculatorTest {
@@ -72,7 +71,7 @@ public class ChecksumCalculatorTest {
 
         this.thrown.expect(IllegalStateException.class);
         this.thrown.expectMessage(
-                String.format(FILE_IN_ILLEGAL_STATE_MESSAGE, fileToCompute.getFilename())
+                String.format(ErrorMessages.FILE_IN_ILLEGAL_STATE_MESSAGE, fileToCompute.getFilename())
         );
 
         checksumCalculator = new ChecksumCalculator(fileRepository, TUS_FILE_ID);

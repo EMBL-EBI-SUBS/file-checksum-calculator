@@ -1,16 +1,15 @@
-package uk.ac.ebi.subs.fileupload.checksumcalculator.service;
+package uk.ac.ebi.subs.filechecksumcalculator.service;
 
-import uk.ac.ebi.subs.fileupload.checksumcalculator.exception.ErrorMessages;
-import uk.ac.ebi.subs.fileupload.checksumcalculator.exception.FileNotFoundException;
+import uk.ac.ebi.subs.filechecksumcalculator.exception.FileNotFoundException;
 import uk.ac.ebi.subs.repository.model.fileupload.File;
 import uk.ac.ebi.subs.repository.model.fileupload.FileStatus;
 import uk.ac.ebi.subs.repository.repos.fileupload.FileRepository;
 
+import uk.ac.ebi.subs.filechecksumcalculator.exception.ErrorMessages;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
-import static uk.ac.ebi.subs.fileupload.checksumcalculator.exception.ErrorMessages.FILE_IN_ILLEGAL_STATE_MESSAGE;
 
 /**
  * This service checks if the file is available with the given ID in the repository.
@@ -57,7 +56,7 @@ public class ChecksumCalculator {
     private boolean isFileReadyForComputeChecksum() {
         if (!FileStatus.READY_FOR_CHECKSUM.equals(getFileToCompute().getStatus())) {
             throw new IllegalStateException(
-                    String.format(FILE_IN_ILLEGAL_STATE_MESSAGE, fileToCompute.getFilename()));
+                    String.format(ErrorMessages.FILE_IN_ILLEGAL_STATE_MESSAGE, fileToCompute.getFilename()));
         }
 
         return true;
