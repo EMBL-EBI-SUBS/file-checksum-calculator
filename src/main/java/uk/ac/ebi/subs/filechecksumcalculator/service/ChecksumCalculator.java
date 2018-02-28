@@ -1,11 +1,12 @@
 package uk.ac.ebi.subs.filechecksumcalculator.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.ac.ebi.subs.filechecksumcalculator.exception.ErrorMessages;
 import uk.ac.ebi.subs.filechecksumcalculator.exception.FileNotFoundException;
 import uk.ac.ebi.subs.repository.model.fileupload.File;
 import uk.ac.ebi.subs.repository.model.fileupload.FileStatus;
 import uk.ac.ebi.subs.repository.repos.fileupload.FileRepository;
-
-import uk.ac.ebi.subs.filechecksumcalculator.exception.ErrorMessages;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +19,8 @@ import java.io.InputStreamReader;
  * updates the {@link File} in the repository. It also updates its status.
  */
 public class ChecksumCalculator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChecksumCalculator.class);
 
     private String tusFileID;
 
@@ -66,7 +69,9 @@ public class ChecksumCalculator {
         String checksum = "";
         String commandForComputeMD5OnLSF = "md5sum " + getFileToCompute().getTargetPath();
 
-        StringBuffer output = new StringBuffer();
+        LOGGER.info("Executing the following command for checksum calculation: {}", commandForComputeMD5OnLSF);
+
+        StringBuilder output = new StringBuilder();
 
         java.lang.Runtime rt = java.lang.Runtime.getRuntime();
         Process process = rt.exec(commandForComputeMD5OnLSF);
@@ -81,6 +86,9 @@ public class ChecksumCalculator {
 
         String[] checksumArray = output.toString().split(" ");
 
+        LOGGER.info("Checksum generation result: {}", output);
+        LOGGER.info("Checksum: {}", checksumArray[0]);
+
         if (checksumArray.length > 0) {
             checksum = checksumArray[0];
         } else {
@@ -92,6 +100,7 @@ public class ChecksumCalculator {
 
     public void updateFileWithChecksum(String checksum) {
         getFileToCompute();
+        LOGGER.info("Set file ID: {} with checksum: {}", fileToCompute.getGeneratedTusId(), checksum);
         fileToCompute.setChecksum(checksum);
         fileToCompute.setStatus(FileStatus.READY_FOR_ARCHIVE);
 
