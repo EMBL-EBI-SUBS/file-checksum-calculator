@@ -42,6 +42,8 @@ public class FileChecksumCalculatorApplication implements CommandLineRunner {
 
 			String checksum = checksumCalculator.calculateMD5();
 
+			LOGGER.info("Calculated checksum: {}", checksum);
+
 			checksumCalculator.updateFileWithChecksum(checksum);
 		}
 	}
