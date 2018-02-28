@@ -1,5 +1,7 @@
 package uk.ac.ebi.subs;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,6 +15,8 @@ import uk.ac.ebi.subs.filechecksumcalculator.service.ChecksumCalculator;
  */
 @SpringBootApplication
 public class FileChecksumCalculatorApplication implements CommandLineRunner {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileChecksumCalculatorApplication.class);
 
     private FileRepository fileRepository;
 
@@ -29,8 +33,10 @@ public class FileChecksumCalculatorApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+    	LOGGER.info("FileChecksumCalculatorApplication started executing.");
 		if (args.length > 0) {
 			String fileId = args[0];
+			LOGGER.info("Checksum calculation started fro file id: {}", fileId);
 			ChecksumCalculator checksumCalculator = new ChecksumCalculator(fileRepository, fileId);
 			checksumCalculator.validateFile();
 
