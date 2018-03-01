@@ -1,7 +1,9 @@
-package uk.ac.ebi.subs.fileupload.checksumcalculator.service;
+package uk.ac.ebi.subs.filechecksumcalculator.service;
 
-import uk.ac.ebi.subs.fileupload.checksumcalculator.exception.ErrorMessages;
-import uk.ac.ebi.subs.fileupload.checksumcalculator.exception.FileNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.ac.ebi.subs.filechecksumcalculator.exception.ErrorMessages;
+import uk.ac.ebi.subs.filechecksumcalculator.exception.FileNotFoundException;
 import uk.ac.ebi.subs.repository.model.fileupload.File;
 import uk.ac.ebi.subs.repository.model.fileupload.FileStatus;
 import uk.ac.ebi.subs.repository.repos.fileupload.FileRepository;
@@ -10,8 +12,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import static uk.ac.ebi.subs.fileupload.checksumcalculator.exception.ErrorMessages.FILE_IN_ILLEGAL_STATE_MESSAGE;
-
 /**
  * This service checks if the file is available with the given ID in the repository.
  * It also checks if the file is in the correct state for calculating it checksum.
@@ -19,6 +19,8 @@ import static uk.ac.ebi.subs.fileupload.checksumcalculator.exception.ErrorMessag
  * updates the {@link File} in the repository. It also updates its status.
  */
 public class ChecksumCalculator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChecksumCalculator.class);
 
     private String tusFileID;
 
@@ -57,7 +59,7 @@ public class ChecksumCalculator {
     private boolean isFileReadyForComputeChecksum() {
         if (!FileStatus.READY_FOR_CHECKSUM.equals(getFileToCompute().getStatus())) {
             throw new IllegalStateException(
-                    String.format(FILE_IN_ILLEGAL_STATE_MESSAGE, fileToCompute.getFilename()));
+                    String.format(ErrorMessages.FILE_IN_ILLEGAL_STATE_MESSAGE, fileToCompute.getFilename()));
         }
 
         return true;
@@ -67,7 +69,9 @@ public class ChecksumCalculator {
         String checksum = "";
         String commandForComputeMD5OnLSF = "md5sum " + getFileToCompute().getTargetPath();
 
-        StringBuffer output = new StringBuffer();
+        LOGGER.info("Executing the following command for checksum calculation: {}", commandForComputeMD5OnLSF);
+
+        StringBuilder output = new StringBuilder();
 
         java.lang.Runtime rt = java.lang.Runtime.getRuntime();
         Process process = rt.exec(commandForComputeMD5OnLSF);
@@ -82,6 +86,9 @@ public class ChecksumCalculator {
 
         String[] checksumArray = output.toString().split(" ");
 
+        LOGGER.info("Checksum generation result: {}", output);
+        LOGGER.info("Checksum: {}", checksumArray[0]);
+
         if (checksumArray.length > 0) {
             checksum = checksumArray[0];
         } else {
@@ -93,6 +100,7 @@ public class ChecksumCalculator {
 
     public void updateFileWithChecksum(String checksum) {
         getFileToCompute();
+        LOGGER.info("Set file ID: {} with checksum: {}", fileToCompute.getGeneratedTusId(), checksum);
         fileToCompute.setChecksum(checksum);
         fileToCompute.setStatus(FileStatus.READY_FOR_ARCHIVE);
 
