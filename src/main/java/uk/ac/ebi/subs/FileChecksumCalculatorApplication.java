@@ -6,6 +6,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.system.ApplicationPidFileWriter;
+import org.springframework.context.ConfigurableApplicationContext;
 import uk.ac.ebi.subs.repository.repos.fileupload.FileRepository;
 import uk.ac.ebi.subs.filechecksumcalculator.service.ChecksumCalculator;
 
@@ -26,9 +27,12 @@ public class FileChecksumCalculatorApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
 		SpringApplication springApplication = new SpringApplication(FileChecksumCalculatorApplication.class);
+		springApplication.setWebEnvironment(false);
 		ApplicationPidFileWriter applicationPidFileWriter = new ApplicationPidFileWriter();
 		springApplication.addListeners( applicationPidFileWriter );
-		springApplication.run(args);
+		ConfigurableApplicationContext ctx = springApplication.run(args);
+
+		SpringApplication.exit(ctx, () -> 0);
 	}
 
 	@Override
