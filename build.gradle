@@ -23,7 +23,7 @@ apply plugin: 'org.hidetake.ssh'
 apply plugin: 'maven-publish'
 
 group = 'uk.ac.ebi.subs'
-version = '0.1.2-SNAPSHOT'
+version = '0.2.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
 mainClassName = "uk.ac.ebi.subs.FileChecksumCalculatorApplication"
@@ -37,7 +37,7 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
 
-	compile('uk.ac.ebi.subs:subs-repository:1.10.0-SNAPSHOT')
+	compile('uk.ac.ebi.subs:subs-repository:2.4.0-SNAPSHOT')
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
