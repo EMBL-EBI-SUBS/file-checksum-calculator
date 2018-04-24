@@ -2,10 +2,10 @@ package uk.ac.ebi.subs.filechecksumcalculator.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.ebi.subs.data.fileupload.FileStatus;
 import uk.ac.ebi.subs.filechecksumcalculator.exception.ErrorMessages;
 import uk.ac.ebi.subs.filechecksumcalculator.exception.FileNotFoundException;
 import uk.ac.ebi.subs.repository.model.fileupload.File;
-import uk.ac.ebi.subs.repository.model.fileupload.FileStatus;
 import uk.ac.ebi.subs.repository.repos.fileupload.FileRepository;
 
 import java.io.BufferedReader;
