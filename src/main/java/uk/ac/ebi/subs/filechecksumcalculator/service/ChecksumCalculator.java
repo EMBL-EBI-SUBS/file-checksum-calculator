@@ -2,10 +2,10 @@ package uk.ac.ebi.subs.filechecksumcalculator.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.ebi.subs.data.fileupload.FileStatus;
 import uk.ac.ebi.subs.filechecksumcalculator.exception.ErrorMessages;
 import uk.ac.ebi.subs.filechecksumcalculator.exception.FileNotFoundException;
 import uk.ac.ebi.subs.repository.model.fileupload.File;
-import uk.ac.ebi.subs.repository.model.fileupload.FileStatus;
 import uk.ac.ebi.subs.repository.repos.fileupload.FileRepository;
 
 import java.io.BufferedReader;
@@ -33,36 +33,8 @@ public class ChecksumCalculator {
         this.tusFileID = tusFileID;
     }
 
-    private File getFileToCompute() {
-        if (fileToCompute == null) {
-            if (tusFileID == null) {
-                throw new IllegalStateException(ErrorMessages.TUS_ID_NULL);
-            }
-            this.fileToCompute = fileRepository.findByGeneratedTusId(tusFileID);
-        }
-
-        return fileToCompute;
-    }
-
     public boolean validateFile() {
         return isFileExists() && isFileReadyForComputeChecksum();
-    }
-
-    private boolean isFileExists() {
-        if (getFileToCompute() == null) {
-            throw new FileNotFoundException(tusFileID);
-        }
-
-        return true;
-    }
-
-    private boolean isFileReadyForComputeChecksum() {
-        if (!FileStatus.READY_FOR_CHECKSUM.equals(getFileToCompute().getStatus())) {
-            throw new IllegalStateException(
-                    String.format(ErrorMessages.FILE_IN_ILLEGAL_STATE_MESSAGE, fileToCompute.getFilename()));
-        }
-
-        return true;
     }
 
     public String calculateMD5() throws IOException, InterruptedException {
@@ -99,11 +71,45 @@ public class ChecksumCalculator {
     }
 
     public void updateFileWithChecksum(String checksum) {
-        getFileToCompute();
+        this.fileToCompute = findFileByTusID();
+
         LOGGER.info("Set file ID: {} with checksum: {}", fileToCompute.getGeneratedTusId(), checksum);
+
         fileToCompute.setChecksum(checksum);
         fileToCompute.setStatus(FileStatus.READY_FOR_ARCHIVE);
 
         fileRepository.save(fileToCompute);
+    }
+
+    private File getFileToCompute() {
+        if (fileToCompute == null) {
+            if (tusFileID == null) {
+                throw new IllegalStateException(ErrorMessages.TUS_ID_NULL);
+            }
+            this.fileToCompute = findFileByTusID();
+        }
+
+        return fileToCompute;
+    }
+
+    private File findFileByTusID() {
+        return fileRepository.findByGeneratedTusId(tusFileID);
+    }
+
+    private boolean isFileExists() {
+        if (getFileToCompute() == null) {
+            throw new FileNotFoundException(tusFileID);
+        }
+
+        return true;
+    }
+
+    private boolean isFileReadyForComputeChecksum() {
+        if (!FileStatus.READY_FOR_CHECKSUM.equals(getFileToCompute().getStatus())) {
+            throw new IllegalStateException(
+                    String.format(ErrorMessages.FILE_IN_ILLEGAL_STATE_MESSAGE, fileToCompute.getFilename()));
+        }
+
+        return true;
     }
 }
