@@ -138,6 +138,7 @@ task testSsh(type: SshTask) {
 private Object sshRun() {
     ssh.run {
         session(remotes.role(gradle_env)) {
+            execute "/homes/sub_adm/create_dirs.sh $gradle_env $project.name", ignoreError: false
             def jarFileName = project.name + "-"  + project.version + "." + System.currentTimeMillis() + ".jar"
             File jarDeployFile = new File("/homes/sub_adm/apps/$env/$project.name/jar",jarFileName)
             File jarDeployDir = jarDeployFile.getParentFile()
