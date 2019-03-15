@@ -23,7 +23,7 @@ apply plugin: 'org.hidetake.ssh'
 apply plugin: 'maven-publish'
 
 group = 'uk.ac.ebi.subs'
-version = '0.3.2-SNAPSHOT'
+version = '0.3.3-SNAPSHOT'
 sourceCompatibility = 1.8
 
 mainClassName = "uk.ac.ebi.subs.FileChecksumCalculatorApplication"
@@ -67,17 +67,41 @@ publish {
 }
 
 remotes {
-    devFCC {
+    devFCCOnCluster {
         role('dev')
-        host = project.hasProperty(project.name + "DevDeployTarget") ? getProperty(project.name + "DevDeployTarget") : 'localhost'
+        host = project.hasProperty(project.name + "DevOnClusterDeployTarget") ? getProperty(project.name + "DevOnClusterDeployTarget") : 'localhost'
     }
-    testFCC {
+    devFCCOnFUSHH {
+        role('dev')
+        host = project.hasProperty(project.name + "DevOnFUSHHDeployTarget") ? getProperty(project.name + "DevOnFUSHHDeployTarget") : 'localhost'
+    }
+    testFCCOnCluster {
         role('test')
-        host = project.hasProperty(project.name + "TestDeployTarget") ? getProperty(project.name + "TestDeployTarget") : 'localhost'
+        host = project.hasProperty(project.name + "TestOnClusterDeployTarget") ? getProperty(project.name + "TestOnClusterDeployTarget") : 'localhost'
     }
-    prodFCC {
+    testFCCOnFUSHH1 {
+        role('test')
+        host = project.hasProperty(project.name + "TestOnFUSHH1DeployTarget") ? getProperty(project.name + "TestOnFUSHH1DeployTarget") : 'localhost'
+    }
+    testFCCOnFUSHH2 {
+        role('test')
+        host = project.hasProperty(project.name + "TestOnFUSHH2DeployTarget") ? getProperty(project.name + "TestOnFUSHH2DeployTarget") : 'localhost'
+    }
+    prodFCCOnCluster {
         role('prod')
-        host = project.hasProperty(project.name + "ProdDeployTarget") ? getProperty(project.name + "ProdDeployTarget") : 'localhost'
+        host = project.hasProperty(project.name + "ProdOnClusterDeployTarget") ? getProperty(project.name + "ProdOnClusterDeployTarget") : 'localhost'
+    }
+    prodFCCOnFUSHH1 {
+        role('prod')
+        host = project.hasProperty(project.name + "ProdOnFUSHH1DeployTarget") ? getProperty(project.name + "ProdOnFUSHH1DeployTarget") : 'localhost'
+    }
+    prodFCCOnFUSHH2 {
+        role('prod')
+        host = project.hasProperty(project.name + "ProdOnFUSHH2DeployTarget") ? getProperty(project.name + "ProdOnFUSHH2DeployTarget") : 'localhost'
+    }
+    prodFCCOnFUSHH3 {
+        role('prod')
+        host = project.hasProperty(project.name + "ProdOnFUSHH3DeployTarget") ? getProperty(project.name + "ProdOnFUSHH3DeployTarget") : 'localhost'
     }
 }
 
@@ -114,6 +138,7 @@ task testSsh(type: SshTask) {
 private Object sshRun() {
     ssh.run {
         session(remotes.role(gradle_env)) {
+            execute "/homes/sub_adm/create_dirs.sh $gradle_env $project.name", ignoreError: false
             def jarFileName = project.name + "-"  + project.version + "." + System.currentTimeMillis() + ".jar"
             File jarDeployFile = new File("/homes/sub_adm/apps/$env/$project.name/jar",jarFileName)
             File jarDeployDir = jarDeployFile.getParentFile()
