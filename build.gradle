@@ -23,7 +23,7 @@ apply plugin: 'org.hidetake.ssh'
 apply plugin: 'maven-publish'
 
 group = 'uk.ac.ebi.subs'
-version = '0.3.3-SNAPSHOT'
+version = '0.3.4-SNAPSHOT'
 sourceCompatibility = 1.8
 
 mainClassName = "uk.ac.ebi.subs.FileChecksumCalculatorApplication"
@@ -37,7 +37,7 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
 
-	compile('uk.ac.ebi.subs:subs-repository:2.6.2-SNAPSHOT')
+	compile('uk.ac.ebi.subs:subs-repository:2.30.1-SNAPSHOT')
 
     compile("de.siegmar:logback-gelf:1.1.0")
 
